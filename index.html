@@ -647,6 +647,15 @@ input,select,textarea{font:inherit}
   .bar-row{grid-template-columns:80px 1fr 30px}
 }
 
+/* Estado de sincronización */
+.sync{width:max-content;max-width:100%;margin:0 0 18px auto;display:flex;align-items:center;gap:8px;font-size:.72rem;line-height:1.3;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted)}
+.sync i{width:9px;height:9px;border-radius:50%;flex:none;background:#f5a524;box-shadow:0 0 10px #f5a524}
+.sync.ok i{background:#20c997;box-shadow:0 0 10px #20c997}
+.sync.saving i{background:var(--cyan);box-shadow:0 0 10px var(--cyan);animation:pulse 1s infinite}
+.sync.err i{background:#ff4d6d;box-shadow:0 0 10px #ff4d6d}
+.sync.ok span{color:#c8f5e6}
+@media (max-width:560px){.sync{margin:0 0 14px;font-size:.66rem}}
+
 </style>
 </head>
 <body>
@@ -880,11 +889,13 @@ input,select,textarea{font:inherit}
       <div class="login-logo" id="loginLogo"></div>
       <h1>Panel Lazeta</h1>
       <p class="muted">Acceso exclusivo para el personal</p>
-      <label>Usuario<input id="lUser" autocomplete="username" required></label>
-      <label>Contraseña<input id="lPass" type="password" autocomplete="current-password" required></label>
+      <label id="userField"><span id="lUserLbl">Usuario</span><input id="lUser" autocomplete="username" required></label>
+      <label><span id="lPassLbl">Contraseña</span><input id="lPass" type="password" autocomplete="current-password" required></label>
+      <label class="tg" id="rememberWrap" hidden><input type="checkbox" id="remember" checked><i></i>Recordar en este dispositivo</label>
+      <small class="demo-hint" id="repoInfo" hidden></small>
       <p class="login-err" id="loginErr"></p>
       <button class="btn btn-primary full" type="submit"><span>Ingresar</span></button>
-      <small class="demo-hint">Demo → usuario: <b>admin</b> · contraseña: <b>lazeta2026</b></small>
+      <small class="demo-hint" id="demoHint">Demo → usuario: <b>admin</b> · contraseña: <b>lazeta2026</b></small>
       <a href="#" class="back-link">← Volver a la tienda</a>
     </form>
   </section>
@@ -906,6 +917,7 @@ input,select,textarea{font:inherit}
     </aside>
 
     <main class="main">
+      <div class="sync" id="sync"><i></i><span>…</span></div>
       <!-- DASHBOARD -->
       <section class="tab show" id="tab-dash">
         <header class="top"><div><h1>Hola, equipo Lazeta 👋</h1><p class="muted">Así está tu tienda hoy.</p></div>
@@ -949,13 +961,13 @@ input,select,textarea{font:inherit}
             <label>Código de descuento<input name="promoCode"></label>
             <label>% de descuento<input name="promoPct" type="number" min="0" max="90"></label>
             <label>Envío gratis desde ($)<input name="freeShipping" type="number" min="0"></label>
-            <label>Contraseña del panel<input name="adminPass" type="text"></label>
+            <label id="passField">Contraseña del panel<input name="adminPass" type="text"></label>
           </div>
           <div class="form-actions"><button class="btn btn-primary" type="submit"><span>Guardar cambios</span></button></div>
         </form>
         <div class="panel">
           <h3>Respaldo de datos</h3>
-          <p class="muted small">Exportá tu catálogo para guardarlo o pasarlo a otra computadora.</p>
+          <p class="muted small" id="backupTxt">Exportá tu catálogo para guardarlo o pasarlo a otra computadora.</p>
           <div class="row-btns">
             <button class="btn btn-ghost sm" id="exportBtn">⬇ Descargar respaldo</button>
             <button class="btn btn-ghost sm" id="copyBtn">📋 Copiar datos</button>
@@ -1031,15 +1043,40 @@ input,select,textarea{font:inherit}
   document.getElementById(IS_ADMIN ? 'adminView' : 'storeView').hidden = false;
 </script>
 <script>
+/* =====================================================================
+   ★ CONFIGURACIÓN · GitHub como base de datos ★
+   Publicada en GitHub Pages (usuario.github.io/repositorio) se detecta
+   sola: no hace falta tocar nada. Completá GITHUB_REPO solo si usás un
+   dominio propio. Abierta en otro lado funciona en MODO DEMO.
+   ===================================================================== */
+const LZ_CONFIG = {
+  GITHUB_REPO: '',               // ej: 'miusuario/lazeta'  (vacío = automático)
+  GITHUB_BRANCH: 'main',         // rama publicada en GitHub Pages
+  DATA_FILE: 'datos/catalogo.json',
+  PHOTOS_DIR: 'datos/fotos'
+};
+
 /* =========================================================
-   LAZETA FRAGANCIAS — Capa de datos compartida (tienda + admin)
-   Demo: guarda en localStorage del navegador.
-   Producción: reemplazar get/save por Firebase / Supabase.
+   LAZETA FRAGANCIAS — Capa de datos compartida (tienda + panel)
    ========================================================= */
 const LZ = (() => {
-  const KEY_P = 'lazeta_products_v1';
-  const KEY_S = 'lazeta_settings_v1';
+  function detectRepo() {
+    const c = (LZ_CONFIG.GITHUB_REPO || '').trim().replace(/^https?:\/\/github\.com\//i, '').replace(/\.git$/, '').replace(/\/+$/, '');
+    if (c) return c;
+    const h = location.hostname.match(/^([a-z0-9-]+)\.github\.io$/i);
+    if (!h) return '';
+    const seg = location.pathname.split('/').filter(Boolean)[0];
+    return `${h[1]}/${seg && !/\.html?$/i.test(seg) ? seg : h[1] + '.github.io'}`;
+  }
+  const REPO = detectRepo();
+  const BRANCH = LZ_CONFIG.GITHUB_BRANCH || 'main';
+  const DATA_FILE = LZ_CONFIG.DATA_FILE;
+  const CLOUD = !!REPO;
+  const KEY_P = CLOUD ? 'lazeta_products_gh' : 'lazeta_products_v1';
+  const KEY_S = CLOUD ? 'lazeta_settings_gh' : 'lazeta_settings_v1';
+  const KEY_U = 'lzmeta_updated_gh';
   const KEY_C = 'lazeta_cart_v1';
+  const KEY_T = 'lz_gh_token';
   const mem = {};
 
   const FAMILIES = ['Cítrico', 'Acuático', 'Floral', 'Amaderado', 'Oriental', 'Gourmand'];
@@ -1100,32 +1137,164 @@ const LZ = (() => {
     try { const v = localStorage.getItem(key); if (v) return JSON.parse(v); } catch (e) {}
     return mem[key] ? clone(mem[key]) : clone(def);
   }
-  function write(key, val) {
-    mem[key] = clone(val);
-    try { localStorage.setItem(key, JSON.stringify(val)); notify(); return true; }
-    catch (e) { notify(); return false; }
-  }
+  function keep(key, val) { mem[key] = clone(val); try { localStorage.setItem(key, JSON.stringify(val)); return true; } catch (e) { return false; } }
+  function write(key, val) { const ok = keep(key, val); notify(); return ok; }
 
+  /* ---------- Avisos de cambios entre pestañas ---------- */
   let bc = null;
   try { bc = new BroadcastChannel('lazeta'); } catch (e) {}
   const listeners = [];
   function notify() { try { bc && bc.postMessage('changed'); } catch (e) {} }
   let t;
   const fire = () => { clearTimeout(t); t = setTimeout(() => listeners.forEach((f) => f()), 60); };
-  window.addEventListener('storage', (e) => { if (!e.key || (e.key.startsWith('lazeta_') && e.key !== KEY_C)) fire(); });
+  window.addEventListener('storage', (e) => { if (!e.key || e.key === KEY_P || e.key === KEY_S) fire(); });
   if (bc) bc.onmessage = fire;
   function onChange(fn) { listeners.push(fn); }
 
+  /* ---------- GitHub como base de datos ---------- */
+  let token = '';
+  try { token = localStorage.getItem(KEY_T) || sessionStorage.getItem(KEY_T) || ''; } catch (e) {}
+  let sha = null, cloudMissing = false, cloudError = null;
+  const previews = {};
+  const localUpdated = () => { try { return +localStorage.getItem(KEY_U) || 0; } catch (e) { return +mem[KEY_U] || 0; } };
+  const setUpdated = (n) => { mem[KEY_U] = n; try { localStorage.setItem(KEY_U, String(n)); } catch (e) {} };
+
+  function friendly(e) {
+    const s = e.status;
+    const msg = s === 401 ? 'el token no es válido o ya venció'
+      : (s === 403 || s === 404) ? 'el token no tiene permiso de escritura en ' + REPO
+      : /Failed to fetch|NetworkError/i.test(e.message || '') ? 'sin conexión a internet' : (e.message || 'error desconocido');
+    const er = new Error(msg); er.status = s; return er;
+  }
+  async function gh(path, opts = {}) {
+    const headers = { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
+    if (token) headers.Authorization = 'Bearer ' + token;
+    if (opts.body) headers['Content-Type'] = 'application/json';
+    const r = await fetch('https://api.github.com' + path, { ...opts, headers, cache: 'no-store' });
+    if (!r.ok) { let m = ''; try { m = (await r.json()).message; } catch (e) {} const er = new Error(m || 'Error ' + r.status); er.status = r.status; throw er; }
+    return r.status === 204 ? null : r.json();
+  }
+  const b64enc = (str) => { const b = new TextEncoder().encode(str); let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(s); };
+  const b64dec = (b64) => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g, '')), (c) => c.charCodeAt(0)));
+  const contentsPath = (p) => `/repos/${REPO}/contents/${p.split('/').map(encodeURIComponent).join('/')}`;
+
+  // Lectura con el token (panel): siempre la última versión
+  async function ghRead() {
+    try {
+      const j = await gh(contentsPath(DATA_FILE) + '?ref=' + encodeURIComponent(BRANCH));
+      sha = j.sha;
+      const txt = j.content ? b64dec(j.content) : await (await fetch(j.download_url, { cache: 'no-store' })).text();
+      return JSON.parse(txt);
+    } catch (e) { if (e.status === 404) { sha = null; return null; } throw friendly(e); }
+  }
+  // Lectura pública (clientes): el archivo publicado en GitHub Pages
+  async function pagesRead() {
+    const r = await fetch(DATA_FILE + '?t=' + Date.now(), { cache: 'no-store' });
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }
+  function applyRemote(obj, force) {
+    if (!obj || !Array.isArray(obj.products)) return false;
+    if (!force && (obj.updatedAt || 0) < localUpdated()) return false; // hay una edición local más nueva
+    const before = JSON.stringify([read(KEY_P, null), read(KEY_S, null)]);
+    keep(KEY_P, obj.products); if (obj.settings) keep(KEY_S, obj.settings);
+    setUpdated(obj.updatedAt || 0);
+    return before !== JSON.stringify([read(KEY_P, null), read(KEY_S, null)]);
+  }
+
+  // Cola: los guardados y las fotos se suben de a uno (evita choques en GitHub)
+  let queue = Promise.resolve();
+  const enqueue = (fn) => { const p = queue.then(fn); queue = p.catch(() => {}); return p; };
+  async function commit(retry = true) {
+    const updatedAt = Date.now();
+    const settings = getSettings(); delete settings.adminPass; delete settings.adminUser; // nunca publicar contraseñas
+    const body = { updatedAt, products: getProducts(), settings };
+    setUpdated(updatedAt);
+    try {
+      const j = await gh(contentsPath(DATA_FILE), { method: 'PUT', body: JSON.stringify({
+        message: 'Catálogo actualizado desde el panel', branch: BRANCH,
+        content: b64enc(JSON.stringify(body, null, 1)), ...(sha ? { sha } : {}) }) });
+      sha = j.content.sha; cloudMissing = false;
+    } catch (e) {
+      if (retry && (e.status === 409 || e.status === 422)) { await ghRead().catch(() => {}); return commit(false); }
+      throw friendly(e);
+    }
+  }
+  let saveTimer = null, waiting = [];
+  function scheduleCommit() {
+    setUpdated(Date.now());
+    return new Promise((res, rej) => {
+      waiting.push({ res, rej }); clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {   // varios cambios seguidos = una sola publicación
+        const ws = waiting; waiting = []; saveTimer = null;
+        enqueue(() => commit()).then(() => ws.forEach((w) => w.res()), (e) => ws.forEach((w) => w.rej(e)));
+      }, 1500);
+    });
+  }
+  const pendingSave = () => !!saveTimer;
+
+  const ready = !CLOUD ? Promise.resolve() : Promise.race([
+    pagesRead().then((o) => { cloudMissing = !o; applyRemote(o); }).catch((e) => { cloudError = e; }),
+    new Promise((r) => setTimeout(r, 6000))
+  ]);
+  if (CLOUD) {
+    const check = () => pagesRead().then((o) => { if (applyRemote(o)) { notify(); fire(); } }).catch(() => {});
+    setInterval(() => { if (!document.hidden && !token) check(); }, 60000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && !token) check(); });
+  }
+
   const getProducts = () => read(KEY_P, defaultProducts);
-  const saveProducts = (p) => write(KEY_P, p);
+  function saveProducts(p) {
+    const ok = write(KEY_P, p);
+    if (CLOUD) return scheduleCommit();
+    return ok ? Promise.resolve() : Promise.reject(new Error('Espacio lleno: usá fotos más livianas'));
+  }
   const getSettings = () => Object.assign(clone(defaultSettings), read(KEY_S, defaultSettings));
-  const saveSettings = (s) => write(KEY_S, s);
+  function saveSettings(s) {
+    const pub = clone(s);
+    if (CLOUD) { delete pub.adminPass; delete pub.adminUser; }
+    write(KEY_S, pub);
+    return CLOUD ? scheduleCommit() : Promise.resolve();
+  }
   const getCart = () => read(KEY_C, []);
   const saveCart = (c) => { mem[KEY_C] = clone(c); try { localStorage.setItem(KEY_C, JSON.stringify(c)); } catch (e) {} };
   function reset() {
+    if (CLOUD) return;
     try { localStorage.removeItem(KEY_P); localStorage.removeItem(KEY_S); } catch (e) {}
     delete mem[KEY_P]; delete mem[KEY_S]; notify();
   }
+
+  /* ---------- Acceso del personal (token de GitHub) y fotos ---------- */
+  const auth = {
+    hasToken: () => !!token,
+    async signIn(tok, remember) {
+      token = String(tok || '').trim();
+      let j;
+      try { j = await gh(`/repos/${REPO}`); } catch (e) { token = ''; throw friendly(e); }
+      if (j.permissions && j.permissions.push === false) { token = ''; throw new Error('ese token no tiene permiso de escritura en ' + REPO); }
+      try { (remember ? localStorage : sessionStorage).setItem(KEY_T, token); } catch (e) {}
+    },
+    async signOut() { token = ''; try { localStorage.removeItem(KEY_T); sessionStorage.removeItem(KEY_T); } catch (e) {} }
+  };
+  // Trae la versión más nueva desde GitHub (para el panel)
+  async function adminLoad() {
+    const o = await enqueue(() => ghRead());
+    cloudMissing = !o; cloudError = null;
+    if (o && !pendingSave()) applyRemote(o, true);
+  }
+  function uploadPhoto(blob, dataUrl) {
+    const path = `${LZ_CONFIG.PHOTOS_DIR}/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}.jpg`;
+    return enqueue(async () => {
+      try { await gh(contentsPath(path), { method: 'PUT', body: JSON.stringify({ message: 'Foto de producto', branch: BRANCH, content: dataUrl.split(',')[1] }) }); }
+      catch (e) { throw friendly(e); }
+      previews[path] = dataUrl; try { sessionStorage.setItem('lzprev:' + path, dataUrl); } catch (e) {}
+      return path;
+    });
+  }
+  // Mientras GitHub Pages publica una foto nueva, el panel la muestra desde la memoria
+  const photoSrc = (src) => { if (!src) return ''; if (previews[src]) return previews[src]; try { return sessionStorage.getItem('lzprev:' + src) || src; } catch (e) { return src; } };
+  const status = () => ({ cloud: CLOUD, repo: REPO, missing: cloudMissing, error: cloudError });
 
   const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
   const money = (n) => fmt.format(Number(n) || 0);
@@ -1180,10 +1349,10 @@ const LZ = (() => {
   }
 
   const productVisual = (p) => p.photo
-    ? `<img src="${p.photo}" alt="${esc(p.name)}" loading="lazy">`
+    ? `<img src="${esc(photoSrc(p.photo))}" alt="${esc(p.name)}" loading="lazy">`
     : bottleSVG(p.color, p.shape, p.name);
 
-  return { FAMILIES, GENDERS, MOMENTS, SHAPES, getProducts, saveProducts, getSettings, saveSettings, getCart, saveCart, reset, onChange, money, esc, uid, logoSVG, bottleSVG, productVisual };
+  return { FAMILIES, GENDERS, MOMENTS, SHAPES, getProducts, saveProducts, getSettings, saveSettings, getCart, saveCart, reset, onChange, ready, auth, adminLoad, uploadPhoto, status, isCloud: () => CLOUD, money, esc, uid, logoSVG, bottleSVG, productVisual };
 })();
 
 </script>
@@ -1211,8 +1380,10 @@ const LZ = (() => {
   $('#footIcon').innerHTML = LZ.logoSVG();
   $('#popupIcon').innerHTML = LZ.logoSVG();
   $('#heroBottle').innerHTML = LZ.logoSVG();
-  window.addEventListener('load', () => setTimeout(() => $('#preloader').classList.add('done'), 1300));
-  setTimeout(() => $('#preloader').classList.add('done'), 3500);
+  // El preloader espera a que carguen la página y el catálogo de la nube
+  const loaded = new Promise((r) => (document.readyState === 'complete' ? r() : addEventListener('load', r)));
+  Promise.all([loaded, LZ.ready, new Promise((r) => setTimeout(r, 1300))]).then(() => $('#preloader').classList.add('done'));
+  setTimeout(() => $('#preloader').classList.add('done'), 8000);
   $('#year').textContent = new Date().getFullYear();
 
   /* ---------- Textos dinámicos (desde el panel) ---------- */
@@ -1619,11 +1790,12 @@ const LZ = (() => {
   /* ---------- Render + actualización en vivo desde el panel ---------- */
   function renderAll() { renderTexts(); renderChips(); renderFeatured(); renderGrid(); renderLab(); saveCart(); }
   renderAll();
+  LZ.ready.then(() => { products = LZ.getProducts(); settings = LZ.getSettings(); renderAll(); $('#statProducts').textContent = visible().length; });
   LZ.onChange(() => {
     products = LZ.getProducts(); settings = LZ.getSettings();
     renderTexts(); renderFeatured(); renderGrid(); saveCart();
     $('#statProducts').textContent = visible().length;
-    toast('✦ Catálogo actualizado');
+    toast('✦ Catálogo actualizado con novedades');
   });
 })();
 
@@ -1639,6 +1811,7 @@ const LZ = (() => {
   let settings = LZ.getSettings();
   let editing = null; // id en edición
   let photoData = '';
+  let uploading = false, uploadSeq = 0;
 
   ['#loginLogo', '#sideLogo'].forEach((s) => ($(s).innerHTML = LZ.logoSVG()));
 
@@ -1653,21 +1826,73 @@ const LZ = (() => {
     });
   }
 
-  /* ---------- Login (demo: validación en el navegador) ---------- */
-  let logged = false; try { logged = sessionStorage.getItem('lz_admin') === '1'; } catch (e) {}
-  const enter = () => { $('#login').hidden = true; $('#app').hidden = false; renderAll(); };
-  if (logged) enter();
-  $('#loginForm').addEventListener('submit', (e) => {
+  /* ---------- Modo: GitHub o demo ---------- */
+  const CLOUD = LZ.isCloud();
+  const REPO = LZ.status().repo;
+  function setSync(state, txt) {
+    const el = $('#sync'); el.className = 'sync ' + state;
+    el.querySelector('span').textContent = txt || {
+      ok: `Conectado a GitHub (${REPO}) · los clientes ven los cambios en 1-2 min`,
+      saving: 'Guardando en GitHub…',
+      err: 'No se pudo guardar · revisá la conexión o el token',
+      demo: 'Modo demo · los cambios quedan solo en este navegador'
+    }[state];
+  }
+  if (CLOUD) {
+    $('#userField').hidden = true; $('#lUser').required = false;
+    $('#lPassLbl').textContent = 'Token de GitHub'; $('#lPass').autocomplete = 'off'; $('#lPass').placeholder = 'github_pat_…';
+    $('#rememberWrap').hidden = false;
+    $('#repoInfo').hidden = false; $('#repoInfo').innerHTML = `Repositorio: <b>${esc(REPO)}</b><br>Usá un token con permiso <b>Contents: Read and write</b> (ver README).`;
+    $('#demoHint').hidden = true; $('#passField').hidden = true; $('#resetBtn').hidden = true;
+    $('#backupTxt').textContent = 'Descargá una copia del catálogo. Con "Importar" podés publicar un respaldo guardado.';
+  }
+
+  /* ---------- Login ---------- */
+  function loginError(msg) {
+    $('#loginErr').textContent = msg;
+    const c = $('#loginForm'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
+  }
+  async function enter() {
+    $('#login').hidden = true; $('#app').hidden = false;
+    await LZ.ready;
+    if (CLOUD) {
+      setSync('saving', 'Leyendo el catálogo desde GitHub…');
+      try { await LZ.adminLoad(); }
+      catch (e) {
+        if (e.status === 401) { await LZ.auth.signOut(); $('#login').hidden = false; $('#app').hidden = true; return loginError('El token guardado ya no es válido: ingresá uno nuevo'); }
+        setSync('err', 'No se pudo leer GitHub: ' + e.message);
+      }
+    }
+    products = LZ.getProducts(); settings = LZ.getSettings();
+    renderAll();
+    if (!CLOUD) return setSync('demo');
+    if ($('#sync').classList.contains('err')) return;
+    setSync('ok');
+    if (LZ.status().missing) { // primera vez: se publica el catálogo de ejemplo para empezar a editarlo
+      setSync('saving', 'Creando el catálogo en GitHub…');
+      try { await LZ.saveProducts(products); setSync('ok'); toast('✦ Catálogo creado en GitHub · se publica en ~1 min'); }
+      catch (e) { setSync('err'); toast('⚠️ ' + e.message); }
+    }
+  }
+  if (CLOUD) { if (LZ.auth.hasToken()) enter(); }
+  else { let logged = false; try { logged = sessionStorage.getItem('lz_admin') === '1'; } catch (e) {} if (logged) enter(); }
+
+  $('#loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const btn = $('#loginForm button[type=submit]');
+    if (CLOUD) {
+      btn.disabled = true; $('#loginErr').textContent = 'Verificando…';
+      try { await LZ.auth.signIn($('#lPass').value, $('#remember').checked); $('#loginErr').textContent = ''; $('#lPass').value = ''; await enter(); toast('👋 ¡Bienvenido al panel!'); }
+      catch (er) { loginError('No se pudo ingresar: ' + er.message); }
+      btn.disabled = false;
+      return;
+    }
     if ($('#lUser').value.trim() === settings.adminUser && $('#lPass').value === settings.adminPass) {
       try { sessionStorage.setItem('lz_admin', '1'); } catch (er) {}
       enter(); toast('👋 ¡Bienvenido al panel!');
-    } else {
-      $('#loginErr').textContent = 'Usuario o contraseña incorrectos';
-      const c = $('#loginForm'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
-    }
+    } else loginError('Usuario o contraseña incorrectos');
   });
-  $('#logout').onclick = () => { try { sessionStorage.removeItem('lz_admin'); } catch (e) {} location.hash = 'admin'; location.reload(); };
+  $('#logout').onclick = async () => { try { sessionStorage.removeItem('lz_admin'); } catch (e) {} await LZ.auth.signOut().catch(() => {}); location.hash = 'admin'; location.reload(); };
 
   /* ---------- Tabs ---------- */
   function goTab(t) {
@@ -1686,10 +1911,11 @@ const LZ = (() => {
 
   /* ---------- Persistencia ---------- */
   function persist(msg) {
-    const ok = LZ.saveProducts(products);
-    if (!ok) toast('⚠️ Espacio lleno: usá fotos más livianas');
-    else if (msg) toast(msg);
-    renderAll();
+    renderDash(); renderList();
+    if (CLOUD) setSync('saving');
+    LZ.saveProducts(products)
+      .then(() => { if (CLOUD) setSync('ok'); if (msg) toast(msg + (CLOUD ? ' · visible en 1-2 min' : '')); })
+      .catch((e) => { if (CLOUD) setSync('err'); toast('⚠️ No se guardó: ' + (e.message || 'revisá la conexión')); });
   }
 
   /* ---------- Dashboard ---------- */
@@ -1784,7 +2010,7 @@ const LZ = (() => {
     ['name', 'gender', 'family', 'price', 'oldPrice', 'stock', 'ml', 'moment', 'intensity', 'badge', 'description', 'color', 'shape'].forEach((k) => (F[k].value = p[k] || (k === 'oldPrice' ? '' : p[k] ?? '')));
     F.top.value = p.notes.top; F.heart.value = p.notes.heart; F.base.value = p.notes.base;
     F.visible.checked = p.visible !== false; F.featured.checked = !!p.featured;
-    photoData = p.photo || '';
+    photoData = p.photo || ''; uploadSeq++; uploading = false; $('#photo').value = '';
     preview();
     $('#pModal').classList.add('show'); document.body.classList.add('lock');
     setTimeout(() => F.name.focus(), 300);
@@ -1796,10 +2022,11 @@ const LZ = (() => {
 
   F.addEventListener('submit', (e) => {
     e.preventDefault();
+    if (uploading) return toast('⏳ Esperá a que termine de subir la foto');
     const data = formData();
     if (editing) Object.assign(products.find((p) => p.id === editing), data);
     else products.unshift({ id: LZ.uid(), ...data });
-    closeForm(); persist(editing ? '✓ Cambios guardados — ya se ven en la tienda' : '✦ Producto creado y publicado');
+    closeForm(); persist(editing ? '✓ Cambios guardados' : '✦ Producto creado');
   });
 
   /* ---------- Fotos: subir, arrastrar y comprimir ---------- */
@@ -1809,7 +2036,7 @@ const LZ = (() => {
   ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
   ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
   drop.addEventListener('drop', (e) => e.dataTransfer.files[0] && loadPhoto(e.dataTransfer.files[0]));
-  $('#rmPhoto').onclick = () => { photoData = ''; $('#photo').value = ''; preview(); };
+  $('#rmPhoto').onclick = () => { uploadSeq++; uploading = false; photoData = ''; $('#photo').value = ''; preview(); };
   function loadPhoto(file) {
     if (!file.type.startsWith('image/')) return toast('Elegí un archivo de imagen');
     const r = new FileReader();
@@ -1819,7 +2046,14 @@ const LZ = (() => {
         const max = 700, k = Math.min(1, max / Math.max(img.width, img.height));
         const c = document.createElement('canvas'); c.width = img.width * k; c.height = img.height * k;
         c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-        photoData = c.toDataURL('image/jpeg', 0.82); preview(); toast('📸 Foto cargada');
+        photoData = c.toDataURL('image/jpeg', 0.82); preview();
+        if (!CLOUD) return toast('📸 Foto cargada');
+        const my = ++uploadSeq; uploading = true; toast('⏫ Subiendo foto a GitHub…');
+        c.toBlob(async (blob) => {
+          try { const url = await LZ.uploadPhoto(blob, c.toDataURL('image/jpeg', 0.82)); if (my === uploadSeq) { photoData = url; preview(); toast('📸 Foto subida a GitHub'); } }
+          catch (er) { toast('⚠️ No se pudo subir la foto: ' + (er.message || '')); }
+          if (my === uploadSeq) uploading = false;
+        }, 'image/jpeg', 0.82);
       };
       img.src = r.result;
     };
@@ -1829,7 +2063,7 @@ const LZ = (() => {
   /* ---------- Ajustes ---------- */
   const S = $('#settForm');
   function fillSettings() {
-    ['whatsapp', 'instagram', 'heroKicker', 'heroTitle', 'heroSubtitle', 'promoCode', 'promoPct', 'freeShipping', 'adminPass'].forEach((k) => (S[k].value = settings[k]));
+    ['whatsapp', 'instagram', 'heroKicker', 'heroTitle', 'heroSubtitle', 'promoCode', 'promoPct', 'freeShipping', 'adminPass'].forEach((k) => (S[k].value = settings[k] ?? ''));
     S.announce.value = settings.announce.join('\n');
   }
   S.addEventListener('submit', (e) => {
@@ -1838,7 +2072,10 @@ const LZ = (() => {
     settings.whatsapp = settings.whatsapp.replace(/\D/g, '');
     settings.promoPct = +S.promoPct.value || 0; settings.freeShipping = +S.freeShipping.value || 0;
     settings.announce = S.announce.value.split('\n').map((s) => s.trim()).filter(Boolean);
-    LZ.saveSettings(settings); toast('✓ Ajustes guardados');
+    if (CLOUD) setSync('saving');
+    LZ.saveSettings(settings)
+      .then(() => { if (CLOUD) setSync('ok'); toast('✓ Ajustes guardados' + (CLOUD ? ' · visibles en 1-2 min' : '')); })
+      .catch((er) => { setSync('err'); toast('⚠️ No se guardó: ' + (er.message || '')); });
   });
 
   const backup = () => JSON.stringify({ products, settings }, null, 2);
@@ -1856,7 +2093,7 @@ const LZ = (() => {
     const r = new FileReader();
     r.onload = () => {
       try { const d = JSON.parse(r.result); if (!Array.isArray(d.products)) throw 0;
-        products = d.products; if (d.settings) { settings = Object.assign(settings, d.settings); LZ.saveSettings(settings); }
+        products = d.products; if (d.settings) { settings = Object.assign(settings, d.settings); LZ.saveSettings(settings).catch(() => {}); }
         persist('⬆ Datos importados'); fillSettings();
       } catch (er) { toast('Archivo inválido'); }
     };
