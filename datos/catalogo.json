@@ -1,6 +1,30 @@
 {
- "updatedAt": 1794967397859,
+ "updatedAt": 1794967415183,
  "products": [
+  {
+   "id": "pmwlh94fgcmog",
+   "name": "Azul Profundo",
+   "gender": "Unisex",
+   "family": "Cítrico",
+   "price": 33,
+   "oldPrice": 0,
+   "stock": 10,
+   "ml": 100,
+   "moment": "Día",
+   "intensity": 3,
+   "badge": "Nuevo",
+   "notes": {
+    "top": "",
+    "heart": "",
+    "base": ""
+   },
+   "description": "",
+   "color": "#0ec0e0",
+   "shape": "round",
+   "visible": true,
+   "featured": false,
+   "photo": ""
+  },
   {
    "id": "p1",
    "name": "Azul Profundo",
