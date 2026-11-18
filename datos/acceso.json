@@ -1,0 +1,13 @@
+{
+ "aviso": "Tokens cifrados con la contraseña de cada usuario. No editar a mano.",
+ "usuarios": [
+  {
+   "user": "admin",
+   "iter": 600000,
+   "salt": "Z0fGYSNfR8AF9d9jPoPzJg==",
+   "iv": "v3X+Vc5mEtHYQCeQ",
+   "data": "ecd86QkOXZHeABA/DlLOsbZH+tdHbbpVtRyfQgBR1TQusbx1+fGS0K3OXnKoM+l55+qEF/Knpus+jfOzCKMc8XEl4hkInkwcKclnymCcrWWAb1/C8ybGeKQx9RDDMFllpWIvgl+W+8o918ihLQ==",
+   "creado": "2026-11-18T02:25:29.766Z"
+  }
+ ]
+}
