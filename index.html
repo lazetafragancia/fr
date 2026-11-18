@@ -282,7 +282,7 @@ body.admin .search-box:focus-within{border-color:var(--cyan)}
 .footer{padding:60px 0 24px;background:#07062a;color:#fff;--cap:#fff}
 .footer .muted,.footer a{color:#aab2dc}
 .footer .brand-text small{color:#aab2dc}
-.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:30px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:30px}
 .footer h5{font-size:.72rem;letter-spacing:.25em;text-transform:uppercase;color:var(--cyan);margin-bottom:14px}
 .footer a{display:block;font-size:.88rem;margin-bottom:8px;transition:.3s}
 .footer a:hover{color:#fff;transform:translateX(4px)}
@@ -656,6 +656,14 @@ input,select,textarea{font:inherit}
 .sync.ok span{color:#c8f5e6}
 @media (max-width:560px){.sync{margin:0 0 14px;font-size:.66rem}}
 
+/* Acceso del personal */
+.access.highlight{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(14,192,224,.18);animation:fadeUp .6s var(--ease)}
+.access-list{display:grid;gap:8px;margin:14px 0 18px}
+.access-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:.88rem}
+.access-item small{color:var(--muted);font-size:.72rem}
+.access-empty{padding:12px 14px;border-radius:12px;border:1px dashed rgba(245,165,36,.6);color:#f5c26b;font-size:.82rem}
+.login-card .link-btn{justify-self:center}
+
 </style>
 </head>
 <body>
@@ -840,7 +848,6 @@ input,select,textarea{font:inherit}
       </div>
       <div><h5>Tienda</h5><a href="#catalogo">Catálogo</a><a href="#destacados">Destacados</a><a href="#quiz">Laboratorio de aromas</a></div>
       <div><h5>Contacto</h5><a id="footWa" href="#">WhatsApp</a><a id="footIg" href="#">Instagram</a></div>
-      <div><h5>Personal</h5><a href="#admin">Panel de administración →</a></div>
     </div>
     <div class="container foot-bottom">© <span id="year"></span> Lazeta Fragancias. Todos los derechos reservados.</div>
   </footer>
@@ -893,10 +900,10 @@ input,select,textarea{font:inherit}
       <label><span id="lPassLbl">Contraseña</span><input id="lPass" type="password" autocomplete="current-password" required></label>
       <label class="tg" id="rememberWrap" hidden><input type="checkbox" id="remember" checked><i></i>Recordar en este dispositivo</label>
       <small class="demo-hint" id="repoInfo" hidden></small>
+      <button type="button" class="link-btn" id="tokenToggle" hidden>¿Primera vez? Ingresar con el token de GitHub</button>
       <p class="login-err" id="loginErr"></p>
       <button class="btn btn-primary full" type="submit"><span>Ingresar</span></button>
-      <small class="demo-hint" id="demoHint">Demo → usuario: <b>admin</b> · contraseña: <b>lazeta2026</b></small>
-      <a href="#" class="back-link">← Volver a la tienda</a>
+      <a href="#" class="back-link" id="backLink">← Volver a la tienda</a>
     </form>
   </section>
 
@@ -965,6 +972,20 @@ input,select,textarea{font:inherit}
           </div>
           <div class="form-actions"><button class="btn btn-primary" type="submit"><span>Guardar cambios</span></button></div>
         </form>
+        <div class="panel access" id="accessPanel" hidden>
+          <h3>🔐 Acceso del personal</h3>
+          <p class="muted small">Con usuario y contraseña se entra al panel desde cualquier celular o computadora, sin el token de GitHub. El token queda guardado <b>cifrado</b> con la contraseña de cada usuario.</p>
+          <div class="access-list" id="accessList"></div>
+          <form class="form" id="accessForm" autocomplete="off">
+            <div class="fgrid">
+              <label class="span2">Usuario<input name="u" required minlength="3" maxlength="30" placeholder="ej: lazeta o maria"></label>
+              <label>Contraseña <small>(mínimo 10 caracteres)</small><input name="p1" type="password" required minlength="10" autocomplete="new-password"></label>
+              <label>Repetir contraseña<input name="p2" type="password" required minlength="10" autocomplete="new-password"></label>
+            </div>
+            <p class="muted small">Si el usuario ya existe, se le cambia la contraseña.</p>
+            <div class="form-actions"><button class="btn btn-primary" type="submit"><span>Guardar usuario</span></button></div>
+          </form>
+        </div>
         <div class="panel">
           <h3>Respaldo de datos</h3>
           <p class="muted small" id="backupTxt">Exportá tu catálogo para guardarlo o pasarlo a otra computadora.</p>
@@ -1053,7 +1074,8 @@ const LZ_CONFIG = {
   GITHUB_REPO: '',               // ej: 'miusuario/lazeta'  (vacío = automático)
   GITHUB_BRANCH: 'main',         // rama publicada en GitHub Pages
   DATA_FILE: 'datos/catalogo.json',
-  PHOTOS_DIR: 'datos/fotos'
+  PHOTOS_DIR: 'datos/fotos',
+  ACCESS_FILE: 'datos/acceso.json'   // usuarios del panel (el token va cifrado con su contraseña)
 };
 
 /* =========================================================
@@ -1071,6 +1093,7 @@ const LZ = (() => {
   const REPO = detectRepo();
   const BRANCH = LZ_CONFIG.GITHUB_BRANCH || 'main';
   const DATA_FILE = LZ_CONFIG.DATA_FILE;
+  const ACCESS_FILE = LZ_CONFIG.ACCESS_FILE;
   const CLOUD = !!REPO;
   const KEY_P = CLOUD ? 'lazeta_products_gh' : 'lazeta_products_v1';
   const KEY_S = CLOUD ? 'lazeta_settings_gh' : 'lazeta_settings_v1';
@@ -1179,13 +1202,17 @@ const LZ = (() => {
   const contentsPath = (p) => `/repos/${REPO}/contents/${p.split('/').map(encodeURIComponent).join('/')}`;
 
   // Lectura con el token (panel): siempre la última versión
-  async function ghRead() {
+  async function ghGetFile(path) {
     try {
-      const j = await gh(contentsPath(DATA_FILE) + '?ref=' + encodeURIComponent(BRANCH));
-      sha = j.sha;
+      const j = await gh(contentsPath(path) + '?ref=' + encodeURIComponent(BRANCH));
       const txt = j.content ? b64dec(j.content) : await (await fetch(j.download_url, { cache: 'no-store' })).text();
-      return JSON.parse(txt);
-    } catch (e) { if (e.status === 404) { sha = null; return null; } throw friendly(e); }
+      return { sha: j.sha, data: JSON.parse(txt) };
+    } catch (e) { if (e.status === 404) return null; throw friendly(e); }
+  }
+  async function ghRead() {
+    const f = await ghGetFile(DATA_FILE);
+    sha = f ? f.sha : null;
+    return f ? f.data : null;
   }
   // Lectura pública (clientes): el archivo publicado en GitHub Pages
   async function pagesRead() {
@@ -1275,6 +1302,18 @@ const LZ = (() => {
       if (j.permissions && j.permissions.push === false) { token = ''; throw new Error('ese token no tiene permiso de escritura en ' + REPO); }
       try { (remember ? localStorage : sessionStorage).setItem(KEY_T, token); } catch (e) {}
     },
+    async signInPassword(user, pass, remember) {
+      const list = await publicAccess();
+      const entry = list.find((u) => u.user === normUser(user));
+      let tok = null;
+      if (entry) { try { tok = await openToken(entry, pass); } catch (e) {} }
+      if (!tok) throw new Error('usuario o contraseña incorrectos');
+      try { await auth.signIn(tok, remember); }
+      catch (e) {
+        if (e.status === 401) throw new Error('el token de GitHub guardado venció. Ingresá una vez con un token nuevo y volvé a crear los usuarios');
+        throw e;
+      }
+    },
     async signOut() { token = ''; try { localStorage.removeItem(KEY_T); sessionStorage.removeItem(KEY_T); } catch (e) {} }
   };
   // Trae la versión más nueva desde GitHub (para el panel)
@@ -1294,6 +1333,64 @@ const LZ = (() => {
   }
   // Mientras GitHub Pages publica una foto nueva, el panel la muestra desde la memoria
   const photoSrc = (src) => { if (!src) return ''; if (previews[src]) return previews[src]; try { return sessionStorage.getItem('lzprev:' + src) || src; } catch (e) { return src; } };
+  /* ---------- Usuario y contraseña (el token viaja cifrado) ----------
+     El token de GitHub se cifra con AES-256 usando la contraseña de cada
+     usuario (PBKDF2, 600.000 vueltas) y se guarda en datos/acceso.json.
+     Sin la contraseña correcta el archivo no sirve para nada. */
+  const te = new TextEncoder();
+  const toB64 = (buf) => { const b = new Uint8Array(buf); let s = ''; for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s); };
+  const fromB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const normUser = (u) => String(u || '').trim().toLowerCase();
+  async function deriveKey(user, pass, salt, iterations) {
+    const base = await crypto.subtle.importKey('raw', te.encode(normUser(user) + '\n' + pass), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+  async function sealToken(user, pass, tok) {
+    const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), iter = 600000;
+    const key = await deriveKey(user, pass, salt, iter);
+    const data = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, te.encode(tok));
+    return { user: normUser(user), iter, salt: toB64(salt), iv: toB64(iv), data: toB64(data), creado: new Date().toISOString() };
+  }
+  async function openToken(entry, pass) {
+    const key = await deriveKey(entry.user, pass, fromB64(entry.salt), entry.iter);
+    return new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(entry.iv) }, key, fromB64(entry.data)));
+  }
+  async function publicAccess() {   // lo lee cualquier dispositivo, sin token
+    const tries = [ACCESS_FILE + '?t=' + Date.now(), `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${ACCESS_FILE}?t=${Date.now()}`];
+    for (const u of tries) {
+      try { const r = await fetch(u, { cache: 'no-store' }); if (r.ok) { const j = await r.json(); if (Array.isArray(j.usuarios)) return j.usuarios; } } catch (e) {}
+    }
+    return [];
+  }
+  let accessSha = null, accessUsers = [];
+  const access = {
+    async list() {
+      const f = await enqueue(() => ghGetFile(ACCESS_FILE));
+      accessSha = f ? f.sha : null; accessUsers = f && Array.isArray(f.data.usuarios) ? f.data.usuarios : [];
+      return accessUsers.map((u) => ({ user: u.user, creado: u.creado }));
+    },
+    async _write(list, message) {
+      const put = (withSha) => gh(contentsPath(ACCESS_FILE), { method: 'PUT', body: JSON.stringify({
+        message, branch: BRANCH, content: b64enc(JSON.stringify({ aviso: 'Tokens cifrados con la contraseña de cada usuario. No editar a mano.', usuarios: list }, null, 1)),
+        ...(withSha && accessSha ? { sha: accessSha } : {}) }) });
+      try { const j = await put(true); accessSha = j.content.sha; }
+      catch (e) {
+        if (e.status === 409 || e.status === 422) { const f = await ghGetFile(ACCESS_FILE); accessSha = f ? f.sha : null; const j = await put(true); accessSha = j.content.sha; }
+        else throw friendly(e);
+      }
+      accessUsers = list;
+    },
+    save(user, pass) {
+      if (!token) return Promise.reject(new Error('primero ingresá con el token'));
+      return enqueue(async () => {
+        const entry = await sealToken(user, pass, token);
+        await access._write([...accessUsers.filter((u) => u.user !== entry.user), entry], 'Acceso del panel: usuario ' + entry.user);
+      });
+    },
+    remove(user) {
+      return enqueue(() => access._write(accessUsers.filter((u) => u.user !== normUser(user)), 'Acceso del panel: se quitó ' + normUser(user)));
+    }
+  };
   const status = () => ({ cloud: CLOUD, repo: REPO, missing: cloudMissing, error: cloudError });
 
   const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
@@ -1352,7 +1449,7 @@ const LZ = (() => {
     ? `<img src="${esc(photoSrc(p.photo))}" alt="${esc(p.name)}" loading="lazy">`
     : bottleSVG(p.color, p.shape, p.name);
 
-  return { FAMILIES, GENDERS, MOMENTS, SHAPES, getProducts, saveProducts, getSettings, saveSettings, getCart, saveCart, reset, onChange, ready, auth, adminLoad, uploadPhoto, status, isCloud: () => CLOUD, money, esc, uid, logoSVG, bottleSVG, productVisual };
+  return { FAMILIES, GENDERS, MOMENTS, SHAPES, getProducts, saveProducts, getSettings, saveSettings, getCart, saveCart, reset, onChange, ready, auth, access, adminLoad, uploadPhoto, status, isCloud: () => CLOUD, money, esc, uid, logoSVG, bottleSVG, productVisual };
 })();
 
 </script>
@@ -1378,6 +1475,9 @@ const LZ = (() => {
   $('#preLogo').innerHTML = LZ.logoSVG();
   $('#brandIcon').innerHTML = LZ.logoSVG();
   $('#footIcon').innerHTML = LZ.logoSVG();
+  // Acceso oculto para el personal: 5 toques seguidos en el logo del pie de página
+  let taps = 0, tapT;
+  $('#footIcon').addEventListener('click', () => { taps++; clearTimeout(tapT); tapT = setTimeout(() => (taps = 0), 1500); if (taps >= 5) { taps = 0; location.hash = 'admin'; } });
   $('#popupIcon').innerHTML = LZ.logoSVG();
   $('#heroBottle').innerHTML = LZ.logoSVG();
   // El preloader espera a que carguen la página y el catálogo de la nube
@@ -1838,16 +1938,29 @@ const LZ = (() => {
       demo: 'Modo demo · los cambios quedan solo en este navegador'
     }[state];
   }
+  let loginMode = 'password';
+  function setLoginMode(m) {
+    loginMode = m; const tokenMode = m === 'token';
+    $('#userField').hidden = tokenMode; $('#lUser').required = !tokenMode;
+    $('#lPassLbl').textContent = tokenMode ? 'Token de GitHub' : 'Contraseña';
+    $('#lPass').autocomplete = tokenMode ? 'off' : 'current-password';
+    $('#lPass').placeholder = tokenMode ? 'github_pat_…' : '';
+    $('#lPass').value = ''; $('#loginErr').textContent = '';
+    $('#repoInfo').hidden = !tokenMode;
+    $('#tokenToggle').textContent = tokenMode ? '← Volver a usuario y contraseña' : '¿Primera vez? Ingresar con el token de GitHub';
+  }
   if (CLOUD) {
-    $('#userField').hidden = true; $('#lUser').required = false;
-    $('#lPassLbl').textContent = 'Token de GitHub'; $('#lPass').autocomplete = 'off'; $('#lPass').placeholder = 'github_pat_…';
-    $('#rememberWrap').hidden = false;
-    $('#repoInfo').hidden = false; $('#repoInfo').innerHTML = `Repositorio: <b>${esc(REPO)}</b><br>Usá un token con permiso <b>Contents: Read and write</b> (ver README).`;
-    $('#demoHint').hidden = true; $('#passField').hidden = true; $('#resetBtn').hidden = true;
+    $('#rememberWrap').hidden = false; $('#tokenToggle').hidden = false;
+    $('#repoInfo').innerHTML = `Repositorio: <b>${esc(REPO)}</b><br>Usalo solo la primera vez (o si el token venció). Después creás un usuario y contraseña.`;
+    $('#tokenToggle').onclick = () => setLoginMode(loginMode === 'token' ? 'password' : 'token');
+    setLoginMode('password');
+    $('#accessPanel').hidden = false;
+    $('#passField').hidden = true; $('#resetBtn').hidden = true;
     $('#backupTxt').textContent = 'Descargá una copia del catálogo. Con "Importar" podés publicar un respaldo guardado.';
   }
 
   /* ---------- Login ---------- */
+  let fails = 0, lockUntil = 0;
   function loginError(msg) {
     $('#loginErr').textContent = msg;
     const c = $('#loginForm'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
@@ -1859,7 +1972,7 @@ const LZ = (() => {
       setSync('saving', 'Leyendo el catálogo desde GitHub…');
       try { await LZ.adminLoad(); }
       catch (e) {
-        if (e.status === 401) { await LZ.auth.signOut(); $('#login').hidden = false; $('#app').hidden = true; return loginError('El token guardado ya no es válido: ingresá uno nuevo'); }
+        if (e.status === 401) { await LZ.auth.signOut(); $('#login').hidden = false; $('#app').hidden = true; setLoginMode('token'); return loginError('El token de GitHub venció: ingresá con uno nuevo y volvé a crear los usuarios'); }
         setSync('err', 'No se pudo leer GitHub: ' + e.message);
       }
     }
@@ -1868,6 +1981,7 @@ const LZ = (() => {
     if (!CLOUD) return setSync('demo');
     if ($('#sync').classList.contains('err')) return;
     setSync('ok');
+    loadAccess(true);
     if (LZ.status().missing) { // primera vez: se publica el catálogo de ejemplo para empezar a editarlo
       setSync('saving', 'Creando el catálogo en GitHub…');
       try { await LZ.saveProducts(products); setSync('ok'); toast('✦ Catálogo creado en GitHub · se publica en ~1 min'); }
@@ -1881,16 +1995,30 @@ const LZ = (() => {
     e.preventDefault();
     const btn = $('#loginForm button[type=submit]');
     if (CLOUD) {
+      if (Date.now() < lockUntil) return loginError(`Demasiados intentos. Esperá ${Math.ceil((lockUntil - Date.now()) / 1000)} segundos.`);
       btn.disabled = true; $('#loginErr').textContent = 'Verificando…';
-      try { await LZ.auth.signIn($('#lPass').value, $('#remember').checked); $('#loginErr').textContent = ''; $('#lPass').value = ''; await enter(); toast('👋 ¡Bienvenido al panel!'); }
-      catch (er) { loginError('No se pudo ingresar: ' + er.message); }
+      try {
+        if (loginMode === 'token') await LZ.auth.signIn($('#lPass').value, $('#remember').checked);
+        else await LZ.auth.signInPassword($('#lUser').value, $('#lPass').value, $('#remember').checked);
+        $('#loginErr').textContent = ''; $('#lPass').value = ''; await enter(); toast('👋 ¡Bienvenido al panel!');
+      }
+      catch (er) {
+        if (++fails >= 5) { lockUntil = Date.now() + 60000; fails = 0; loginError('Demasiados intentos. Esperá 1 minuto.'); }
+        else loginError('No se pudo ingresar: ' + er.message);
+      }
       btn.disabled = false;
       return;
     }
+    if (Date.now() < lockUntil) return loginError(`Demasiados intentos. Esperá ${Math.ceil((lockUntil - Date.now()) / 1000)} segundos.`);
     if ($('#lUser').value.trim() === settings.adminUser && $('#lPass').value === settings.adminPass) {
+      fails = 0;
       try { sessionStorage.setItem('lz_admin', '1'); } catch (er) {}
       enter(); toast('👋 ¡Bienvenido al panel!');
-    } else loginError('Usuario o contraseña incorrectos');
+    } else {
+      fails++;
+      if (fails >= 5) { lockUntil = Date.now() + 60000; fails = 0; return loginError('Demasiados intentos. Esperá 1 minuto.'); }
+      loginError('Usuario o contraseña incorrectos');
+    }
   });
   $('#logout').onclick = async () => { try { sessionStorage.removeItem('lz_admin'); } catch (e) {} await LZ.auth.signOut().catch(() => {}); location.hash = 'admin'; location.reload(); };
 
@@ -2104,6 +2232,43 @@ const LZ = (() => {
       LZ.reset(); products = LZ.getProducts(); settings = LZ.getSettings(); fillSettings(); renderAll(); toast('↺ Demo restaurada');
     }
   };
+
+  /* ---------- Acceso del personal (usuario y contraseña) ---------- */
+  async function loadAccess(promptIfEmpty) {
+    if (!CLOUD) return;
+    let list = [];
+    try { list = await LZ.access.list(); } catch (e) { $('#accessList').innerHTML = `<div class="access-empty">No se pudo leer la lista: ${esc(e.message)}</div>`; return; }
+    $('#accessList').innerHTML = list.length
+      ? list.map((u) => `<div class="access-item"><span>👤 <b>${esc(u.user)}</b> <small>${u.creado ? '· desde ' + new Date(u.creado).toLocaleDateString('es-AR') : ''}</small></span><button class="ibtn del" data-rmuser="${esc(u.user)}" title="Quitar acceso">🗑</button></div>`).join('')
+      : '<div class="access-empty">⚠️ Todavía no hay usuarios: por ahora solo se puede entrar con el token. Creá uno abajo.</div>';
+    if (promptIfEmpty && !list.length) {
+      goTab('sett');
+      const panel = $('#accessPanel'); panel.classList.add('highlight');
+      setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+      toast('🔐 Creá tu usuario y contraseña para entrar sin el token');
+    }
+  }
+  $('#accessForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const A = e.target, u = A.u.value.trim(), p1 = A.p1.value, p2 = A.p2.value;
+    if (p1 !== p2) return toast('Las contraseñas no coinciden');
+    if (p1.length < 10) return toast('La contraseña debe tener al menos 10 caracteres');
+    const btn = A.querySelector('button[type=submit]'); btn.disabled = true;
+    setSync('saving', 'Guardando acceso en GitHub…');
+    try {
+      await LZ.access.save(u, p1); A.reset(); setSync('ok');
+      $('#accessPanel').classList.remove('highlight');
+      toast(`✓ Usuario "${esc(u.toLowerCase())}" listo · funciona en 1-2 min desde cualquier dispositivo`);
+      loadAccess(false);
+    } catch (er) { setSync('err'); toast('⚠️ No se guardó: ' + er.message); }
+    btn.disabled = false;
+  });
+  $('#accessList').addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-rmuser]'); if (!b) return;
+    if (!(await ask('¿Quitar acceso?', `"${b.dataset.rmuser}" ya no va a poder entrar al panel.`))) return;
+    try { await LZ.access.remove(b.dataset.rmuser); toast('Acceso quitado'); loadAccess(false); }
+    catch (er) { toast('⚠️ ' + er.message); }
+  });
 
   /* ---------- Render ---------- */
   function renderAll() { renderDash(); renderList(); fillSettings(); }
