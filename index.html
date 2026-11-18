@@ -487,6 +487,38 @@ body.admin .toast{background:#fff;color:#06051c}
   .formula{padding:24px 18px}
 }
 
+/* ===================== Fotos de producto · estilo flyer Lazeta ===================== */
+.stage{position:absolute;inset:0;overflow:hidden;background:#f2f5f9}
+.stage .blob-a{position:absolute;left:-24%;bottom:-20%;width:62%;aspect-ratio:1;border-radius:50%;background:linear-gradient(135deg,#1aa9e0,#0a84c6)}
+.stage .blob-b{position:absolute;right:-26%;top:-28%;width:64%;aspect-ratio:1;border-radius:50%;background:linear-gradient(200deg,#1a2fb0,#10208f)}
+.stage .dots{position:absolute;left:7%;top:7%;width:24%;height:20%;background:radial-gradient(circle,#1aa3d9 1.7px,transparent 2.2px) 0 0/11px 11px;opacity:.85}
+.stage .podium{position:absolute;left:11%;right:11%;bottom:6%;height:15%;border-radius:50%;background:linear-gradient(180deg,#fff 0 40%,#dfe5ed 100%);box-shadow:0 16px 26px -12px rgba(10,8,48,.4),inset 0 -3px 0 rgba(26,47,176,.08)}
+.stage .ph{position:absolute;left:50%;bottom:12%;top:auto;right:auto;transform:translateX(-50%);width:86%;height:80%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 12px 14px rgba(10,8,48,.3));transition:transform .7s var(--ease)}
+.card:hover .stage .ph{transform:translateX(-50%) translateY(-8px) scale(1.04)}
+.m-media .stage .ph{animation:none;width:80%;height:78%}
+.m-media .stage .podium{bottom:8%}
+.ci-img{position:relative}
+.ci-img .stage .dots,.ci-img .stage .podium{display:none}
+.ci-img .stage .ph{bottom:6%;height:88%;width:92%}
+
+/* Precios efectivo / transferencia */
+.price-lbl{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600}
+.transfer{font-size:.8rem;color:var(--muted);margin-bottom:2px}
+.transfer b{color:#0a9b6f;font-size:.98rem}
+.price.big{font-size:1.9rem}
+.price.consult{font-size:1.02rem;color:var(--indigo);letter-spacing:.02em}
+.price.consult.big{font-size:1.4rem}
+.btn-add.consult-btn{background:transparent;color:var(--indigo);border:1.5px solid var(--indigo)}
+.btn-add.consult-btn:hover{background:var(--indigo);color:#fff}
+.feel{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 12px}
+.feel span{font-size:.7rem;font-weight:700;color:var(--indigo);letter-spacing:.08em;text-transform:uppercase}
+.totals .grand-t{display:flex;justify-content:space-between;color:#0a9b6f;font-weight:700;font-size:1rem;margin-top:2px}
+@media (max-width:560px){
+  .transfer{font-size:.68rem}.transfer b{font-size:.82rem}
+  .price-lbl{display:none}
+  .price.consult{font-size:.86rem}
+}
+
 /* ================= PANEL ================= */
 /* =================== LAZETA — Panel admin =================== */
 body.admin{background:#070620}
@@ -663,6 +695,12 @@ input,select,textarea{font:inherit}
 .access-item small{color:var(--muted);font-size:.72rem}
 .access-empty{padding:12px 14px;border-radius:12px;border:1px dashed rgba(245,165,36,.6);color:#f5c26b;font-size:.82rem}
 .login-card .link-btn{justify-self:center}
+.pthumb,#dropPrev{position:relative}
+.pthumb .stage .dots,.pthumb .stage .podium{display:none}
+.pthumb .stage .ph{bottom:4%;height:90%;width:94%}
+.pprice .ptr{display:block;color:#20c997;font-size:.74rem}
+.pprice .pconsult{color:var(--cyan);font-size:.85rem}
+.card-prev .stage .ph{bottom:12%}
 
 </style>
 </head>
@@ -730,7 +768,7 @@ input,select,textarea{font:inherit}
           <div class="hero-trust">
             <div><b data-count="0" id="statProducts">0</b><span>fragancias</span></div>
             <div><b>6</b><span>familias olfativas</span></div>
-            <div><b>3</b><span>cuotas sin interés</span></div>
+            <div><b>100%</b><span>originales</span></div>
           </div>
         </div>
         <div class="hero-visual">
@@ -741,7 +779,7 @@ input,select,textarea{font:inherit}
           <div class="hero-bottle" id="heroBottle"></div>
           <div class="float-tag t1"><span class="dot"></span>Notas frescas</div>
           <div class="float-tag t2"><span class="dot"></span>Larga duración</div>
-          <div class="float-tag t3"><span class="dot"></span>Envío a todo el país</div>
+          <div class="float-tag t3"><span class="dot"></span>Envíos en Azul</div>
         </div>
       </div>
       <a href="#destacados" class="scroll-cue" aria-label="Bajar"><span></span></a>
@@ -818,10 +856,10 @@ input,select,textarea{font:inherit}
     <!-- BENEFICIOS -->
     <section class="section benefits">
       <div class="container benefit-grid">
-        <div class="benefit reveal"><div class="b-ico">🚚</div><h4>Envíos a todo el país</h4><p>Gratis superando el monto mínimo. Despacho en 24/48 h.</p></div>
-        <div class="benefit reveal"><div class="b-ico">💳</div><h4>Cuotas sin interés</h4><p>Pagá con tarjeta, transferencia o efectivo.</p></div>
-        <div class="benefit reveal"><div class="b-ico">✦</div><h4>100% originales</h4><p>Fragancias garantizadas, selladas y con factura.</p></div>
-        <div class="benefit reveal"><div class="b-ico">🎁</div><h4>Listo para regalar</h4><p>Packaging especial y tarjeta personalizada.</p></div>
+        <div class="benefit reveal"><div class="b-ico">🚚</div><h4>Envíos dentro de Azul</h4><p>Coordinamos la entrega para que lo recibas en tu casa.</p></div>
+        <div class="benefit reveal"><div class="b-ico">💸</div><h4>Precio especial por transferencia</h4><p>Pagá en efectivo o aprovechá el mejor precio transfiriendo.</p></div>
+        <div class="benefit reveal"><div class="b-ico">✦</div><h4>100% originales</h4><p>Fragancias árabes y de diseñador, originales y selladas.</p></div>
+        <div class="benefit reveal"><div class="b-ico">💬</div><h4>Te asesoramos</h4><p>Consultas y pedidos por mensaje directo. Te ayudamos a elegir.</p></div>
       </div>
     </section>
 
@@ -1009,11 +1047,15 @@ input,select,textarea{font:inherit}
         <div class="pm-grid">
           <div class="pm-fields">
             <div class="fgrid">
-              <label class="span2">Nombre *<input name="name" required maxlength="40"></label>
+              <label>Nombre *<input name="name" required maxlength="40"></label>
+              <label>Marca<input name="brand" maxlength="30" placeholder="ej: Rayhaan, Lattafa" list="brandList"></label>
+              <datalist id="brandList"><option>Rayhaan</option><option>Rasasi</option><option>Lattafa</option><option>Armaf</option><option>Khadlaj</option></datalist>
               <label>Género<select name="gender"></select></label>
               <label>Familia olfativa<select name="family"></select></label>
-              <label>Precio ($) *<input name="price" type="number" min="0" required></label>
+              <label>Precio efectivo ($) <small>vacío = "Consultar precio"</small><input name="price" type="number" min="0"></label>
+              <label>Precio transferencia ($) <small>opcional</small><input name="transferPrice" type="number" min="0"></label>
               <label>Precio anterior ($) <small>opcional, para mostrar oferta</small><input name="oldPrice" type="number" min="0"></label>
+              <label>Concentración<select name="concentration"><option>Eau de Parfum</option><option>Extrait de Parfum</option><option>Eau de Toilette</option><option>Parfum</option></select></label>
               <label>Stock<input name="stock" type="number" min="0"></label>
               <label>Tamaño (ml)<input name="ml" type="number" min="1"></label>
               <label>Momento de uso<select name="moment"></select></label>
@@ -1023,6 +1065,7 @@ input,select,textarea{font:inherit}
               <label>Notas de salida<input name="top" placeholder="Bergamota, Limón"></label>
               <label>Notas de corazón<input name="heart" placeholder="Lavanda, Jazmín"></label>
               <label class="span2">Notas de fondo<input name="base" placeholder="Vainilla, Sándalo"></label>
+              <label class="span2">Características <small>(separadas por coma, ej: Duradera, Fresca, Vibrante)</small><input name="tags" maxlength="60"></label>
               <label class="span2">Descripción<textarea name="description" rows="3"></textarea></label>
             </div>
           </div>
@@ -1095,8 +1138,8 @@ const LZ = (() => {
   const DATA_FILE = LZ_CONFIG.DATA_FILE;
   const ACCESS_FILE = LZ_CONFIG.ACCESS_FILE;
   const CLOUD = !!REPO;
-  const KEY_P = CLOUD ? 'lazeta_products_gh' : 'lazeta_products_v1';
-  const KEY_S = CLOUD ? 'lazeta_settings_gh' : 'lazeta_settings_v1';
+  const KEY_P = CLOUD ? 'lazeta_products_gh' : 'lazeta_products_v2';
+  const KEY_S = CLOUD ? 'lazeta_settings_gh' : 'lazeta_settings_v2';
   const KEY_U = 'lzmeta_updated_gh';
   const KEY_C = 'lazeta_cart_v1';
   const KEY_T = 'lz_gh_token';
@@ -1107,50 +1150,75 @@ const LZ = (() => {
   const MOMENTS = ['Día', 'Noche', 'Día y noche'];
   const SHAPES = { round: 'Redondo', square: 'Cuadrado', tall: 'Alto', flask: 'Petaca' };
 
+  const F = 'datos/fotos/';
   const defaultProducts = [
-    { id: 'p1', name: 'Azul Profundo', gender: 'Masculino', family: 'Acuático', ml: 100, price: 58900, oldPrice: 69900, stock: 14, badge: 'Más vendido', featured: true, visible: true, moment: 'Día y noche', intensity: 4,
-      notes: { top: 'Bergamota, Sal marina', heart: 'Lavanda, Geranio', base: 'Ámbar gris, Cedro' },
-      description: 'Una ola de frescura marina que se vuelve profunda y elegante con el correr de las horas. Ideal para el que quiere dejar huella sin decir una palabra.', color: '#1A00AA', shape: 'round', photo: '' },
-    { id: 'p2', name: 'Brisa Cian', gender: 'Unisex', family: 'Cítrico', ml: 100, price: 42500, oldPrice: 0, stock: 20, badge: 'Nuevo', featured: true, visible: true, moment: 'Día', intensity: 3,
-      notes: { top: 'Limón siciliano, Pomelo', heart: 'Té verde, Menta', base: 'Almizcle blanco' },
-      description: 'Luminosa, chispeante y limpia. La fragancia de los días de sol, perfecta para la oficina o un brunch al aire libre.', color: '#0EC0E0', shape: 'square', photo: '' },
-    { id: 'p3', name: 'Noche Índigo', gender: 'Masculino', family: 'Oriental', ml: 100, price: 64900, oldPrice: 0, stock: 3, badge: 'Últimas unidades', featured: true, visible: true, moment: 'Noche', intensity: 5,
-      notes: { top: 'Pimienta negra, Cardamomo', heart: 'Cuero, Iris', base: 'Vainilla, Haba tonka' },
-      description: 'Magnética y misteriosa. Especias oscuras sobre un fondo cálido de vainilla para las noches que importan.', color: '#2a1a8a', shape: 'tall', photo: '' },
-    { id: 'p4', name: 'Flor de Cristal', gender: 'Femenino', family: 'Floral', ml: 90, price: 55900, oldPrice: 61900, stock: 9, badge: 'Oferta', featured: false, visible: true, moment: 'Día', intensity: 3,
-      notes: { top: 'Pera, Mandarina', heart: 'Jazmín, Peonía', base: 'Almizcle, Sándalo' },
-      description: 'Un bouquet transparente y delicado, con la frescura de la pera y la feminidad de las flores blancas.', color: '#5fc9ea', shape: 'round', photo: '' },
-    { id: 'p5', name: 'Terciopelo', gender: 'Femenino', family: 'Gourmand', ml: 100, price: 59900, oldPrice: 0, stock: 11, badge: '', featured: true, visible: true, moment: 'Noche', intensity: 4,
-      notes: { top: 'Frambuesa', heart: 'Rosa, Praliné', base: 'Vainilla, Pachulí' },
-      description: 'Dulce, envolvente y seductora. Una caricia de frutos rojos y praliné que no pasa desapercibida.', color: '#c94f7c', shape: 'square', photo: '' },
-    { id: 'p6', name: 'Madera Sagrada', gender: 'Unisex', family: 'Amaderado', ml: 100, price: 72900, oldPrice: 0, stock: 6, badge: 'Premium', featured: true, visible: true, moment: 'Noche', intensity: 5,
-      notes: { top: 'Cardamomo', heart: 'Sándalo, Cedro', base: 'Vetiver, Oud' },
-      description: 'Nuestra joya: maderas nobles y oud en una composición intensa, sofisticada y de larga duración.', color: '#8a5a2b', shape: 'flask', photo: '' },
-    { id: 'p7', name: 'Aqua Sport', gender: 'Masculino', family: 'Acuático', ml: 100, price: 39900, oldPrice: 0, stock: 25, badge: '', featured: false, visible: true, moment: 'Día', intensity: 2,
-      notes: { top: 'Menta, Limón', heart: 'Romero, Notas ozónicas', base: 'Almizcle' },
-      description: 'Energía pura para el día a día. Fresca, deportiva y fácil de llevar.', color: '#29b6d9', shape: 'tall', photo: '' },
-    { id: 'p8', name: 'Dulce Bruma', gender: 'Femenino', family: 'Gourmand', ml: 80, price: 47900, oldPrice: 0, stock: 15, badge: 'Nuevo', featured: false, visible: true, moment: 'Día y noche', intensity: 3,
-      notes: { top: 'Coco, Bergamota', heart: 'Flor de azahar', base: 'Caramelo, Vainilla' },
-      description: 'Suave como una nube. Coco y azahar sobre un fondo cremoso que se queda en la piel.', color: '#f0a6c8', shape: 'square', photo: '' },
-    { id: 'p9', name: 'Ámbar Imperial', gender: 'Unisex', family: 'Oriental', ml: 100, price: 68900, oldPrice: 76900, stock: 7, badge: 'Oferta', featured: true, visible: true, moment: 'Noche', intensity: 5,
-      notes: { top: 'Azafrán', heart: 'Ámbar, Rosa', base: 'Benjuí, Labdano' },
-      description: 'Opulenta y cálida. Azafrán y ámbar en una estela inolvidable, con presencia de principio a fin.', color: '#d9932b', shape: 'round', photo: '' },
-    { id: 'p10', name: 'Cítrico Real', gender: 'Masculino', family: 'Cítrico', ml: 100, price: 44900, oldPrice: 0, stock: 0, badge: '', featured: false, visible: true, moment: 'Día', intensity: 3,
-      notes: { top: 'Neroli, Mandarina', heart: 'Petitgrain', base: 'Vetiver' },
-      description: 'Un clásico mediterráneo: cítricos brillantes con un fondo verde y elegante.', color: '#e0c23a', shape: 'flask', photo: '' }
+    { id: 'armaf-odyssey-mandarin-sky', name: 'Odyssey Mandarin Sky', brand: 'Armaf', concentration: 'Eau de Parfum', gender: 'Masculino', family: 'Cítrico', ml: 100,
+      price: 60000, transferPrice: 55000, oldPrice: 0, stock: 10, badge: 'Edición limitada', featured: true, visible: true, moment: 'Día y noche', intensity: 4,
+      tags: 'Duradera, Fresca, Vibrante',
+      notes: { top: 'Mandarina, Naranja, Azafrán, Salvia', heart: 'Caramelo, Haba tonka, Tagete', base: 'Ambroxan, Cedro, Vetiver' },
+      description: 'Abre con una explosión de mandarina y naranja con un toque especiado de azafrán, se endulza con caramelo y haba tonka, y termina en un fondo amaderado y limpio. Fresca de día y envolvente de noche.',
+      color: '#f28c1e', shape: 'round', photo: F + 'armaf-odyssey-mandarin-sky.webp' },
+    { id: 'rayhaan-tropical-vibe', name: 'Tropical Vibe', brand: 'Rayhaan', concentration: 'Eau de Parfum', gender: 'Unisex', family: 'Cítrico', ml: 100,
+      price: 60000, transferPrice: 55000, oldPrice: 0, stock: 10, badge: '', featured: true, visible: true, moment: 'Día', intensity: 3,
+      tags: 'Duradera, Fresca, Exótica',
+      notes: { top: 'Mango, Piña, Bergamota', heart: 'Flores blancas, Brisa marina, Coco', base: 'Ámbar, Sándalo, Almizcle, Vetiver' },
+      description: 'Un viaje al trópico: mango y piña jugosos con bergamota, un corazón de coco y brisa marina, y un fondo cálido de ámbar y sándalo. Ideal para el verano.',
+      color: '#e98a2a', shape: 'square', photo: F + 'rayhaan-tropical-vibe.webp' },
+    { id: 'khadlaj-island', name: 'Island', brand: 'Khadlaj', concentration: 'Extrait de Parfum', gender: 'Unisex', family: 'Oriental', ml: 100,
+      price: 70000, transferPrice: 64000, oldPrice: 0, stock: 10, badge: 'Extrait', featured: true, visible: true, moment: 'Día y noche', intensity: 5,
+      tags: 'Duradera, Elegante, Sofisticada',
+      notes: { top: 'Bergamota', heart: 'Coco, Jengibre, Piña', base: 'Ámbar, Haba tonka, Sándalo' },
+      description: 'Concentración extrait para una duración superior. Bergamota luminosa, un corazón tropical de coco, piña y jengibre, y una estela elegante de ámbar, tonka y sándalo.',
+      color: '#1f6f5f', shape: 'tall', photo: F + 'khadlaj-island.webp' },
+    { id: 'lattafa-honor-glory', name: "Bade'e Al Oud Honor & Glory", brand: 'Lattafa', concentration: 'Eau de Parfum', gender: 'Unisex', family: 'Gourmand', ml: 100,
+      price: 0, transferPrice: 0, oldPrice: 0, stock: 10, badge: '', featured: true, visible: true, moment: 'Día y noche', intensity: 5,
+      tags: 'Dulce, Especiada, Intensa',
+      notes: { top: 'Piña, Crème brûlée', heart: 'Canela, Cúrcuma, Pimienta negra, Benjuí', base: 'Vainilla, Sándalo, Cashmeran, Musgo' },
+      description: 'Un postre tropical: piña caramelizada y crème brûlée sobre especias cálidas como canela y pimienta, con un fondo cremoso de vainilla y sándalo.',
+      color: '#f1e6c8', shape: 'square', photo: F + 'lattafa-honor-glory.webp' },
+    { id: 'rayhaan-elixir', name: 'Elixir', brand: 'Rayhaan', concentration: 'Eau de Parfum', gender: 'Unisex', family: 'Oriental', ml: 100,
+      price: 0, transferPrice: 0, oldPrice: 0, stock: 10, badge: '', featured: false, visible: true, moment: 'Noche', intensity: 4,
+      tags: 'Dulce, Aromática, Cálida',
+      notes: { top: 'Menta, Bergamota', heart: 'Lavanda, Benjuí', base: 'Vainilla, Haba tonka' },
+      description: 'Frescura de menta y bergamota que se transforma en un corazón de lavanda y benjuí, y termina en un fondo dulce y adictivo de vainilla y tonka.',
+      color: '#c9a032', shape: 'square', photo: F + 'rayhaan-elixir.webp' },
+    { id: 'rayhaan-italia', name: 'Italia Pour Homme', brand: 'Rayhaan', concentration: 'Eau de Parfum', gender: 'Masculino', family: 'Oriental', ml: 100,
+      price: 0, transferPrice: 0, oldPrice: 0, stock: 10, badge: '', featured: false, visible: true, moment: 'Día y noche', intensity: 4,
+      tags: 'Elegante, Dulce, Especiada',
+      notes: { top: 'Lavanda, Bergamota, Limón', heart: 'Miel, Canela, Cashmeran, Jazmín', base: 'Hoja de tabaco, Vainilla, Haba tonka' },
+      description: 'Lavanda y cítricos que dan paso a miel y canela, sobre un fondo cremoso de tabaco y vainilla. Sofisticada y segura.',
+      color: '#d9d4c8', shape: 'square', photo: F + 'rayhaan-italia.webp' },
+    { id: 'rayhaan-aquatica', name: 'Aquatica', brand: 'Rayhaan', concentration: 'Eau de Parfum', gender: 'Masculino', family: 'Cítrico', ml: 100,
+      price: 0, transferPrice: 0, oldPrice: 0, stock: 10, badge: '', featured: false, visible: true, moment: 'Día', intensity: 3,
+      tags: 'Fresca, Tropical, Luminosa',
+      notes: { top: 'Lima, Leche de coco, Bergamota, Mandarina', heart: 'Caña de azúcar, Jazmín, Hibisco, Gardenia', base: 'Ron, Haba tonka, Almizcle, Pachulí' },
+      description: 'Como un mojito tropical: lima y leche de coco, un corazón floral con caña de azúcar y un fondo cálido de ron y tonka. Perfecta para días de sol.',
+      color: '#4fc8e6', shape: 'square', photo: F + 'rayhaan-aquatica.webp' },
+    { id: 'hawas-tropical', name: 'Hawas Tropical', brand: 'Rasasi', concentration: 'Eau de Parfum', gender: 'Masculino', family: 'Acuático', ml: 100,
+      price: 0, transferPrice: 0, oldPrice: 0, stock: 10, badge: '', featured: false, visible: true, moment: 'Día', intensity: 3,
+      tags: 'Fresca, Verde, Tropical',
+      notes: { top: 'Agua de coco, Jengibre, Hoja de higuera', heart: 'Coco, Higo, Menta', base: 'Sándalo, Haba tonka, Almizcle' },
+      description: 'Agua de coco y jengibre con un toque verde de higuera, un corazón cremoso de coco y menta, y un fondo suave de sándalo y almizcle.',
+      color: '#2ec99a', shape: 'round', photo: F + 'hawas-tropical.webp' },
+    { id: 'hawas-malibu', name: 'Hawas Malibu', brand: 'Rasasi', concentration: 'Eau de Parfum', gender: 'Masculino', family: 'Cítrico', ml: 100,
+      price: 0, transferPrice: 0, oldPrice: 0, stock: 10, badge: '', featured: false, visible: true, moment: 'Día', intensity: 4,
+      tags: 'Frutal, Fresca, Moderna',
+      notes: { top: 'Piña, Naranja, Pomelo', heart: 'Iris, Lavanda, Ámbar', base: 'Haba tonka, Cashmeran, Almizcle, Pachulí' },
+      description: 'Piña, naranja y pomelo bien jugosos sobre un corazón de iris y lavanda, con un fondo cálido de tonka y cashmeran. Energía de verano.',
+      color: '#1d6f86', shape: 'round', photo: F + 'hawas-malibu.webp' }
   ];
 
   const defaultSettings = {
     storeName: 'Lazeta Fragancias',
     whatsapp: '5491100000000',
     instagram: 'lazetafragancias',
-    announce: ['✦ Envío gratis en compras desde $80.000', '✦ 3 cuotas sin interés con todas las tarjetas', '✦ Usá el código LAZETA10 y obtené 10% OFF', '✦ Fragancias 100% originales'],
+    announce: ['✦ Fragancias 100% originales', '✦ Precio especial pagando por transferencia', '✦ Envíos dentro de Azul', '✦ Consultas y pedidos por mensaje directo', '✦ Usá el código LAZETA10 y obtené 10% OFF'],
     heroKicker: 'Nueva colección 2026',
     heroTitle: 'Tu esencia, en una sola gota.',
     heroSubtitle: 'Fragancias que cuentan quién sos. Descubrí aromas exclusivos, encontrá el tuyo en segundos y recibilo en tu casa.',
     promoCode: 'LAZETA10',
     promoPct: 10,
-    freeShipping: 80000,
+    freeShipping: 0,            // 0 = sin barra de envío gratis
     adminUser: 'admin',
     adminPass: 'lazeta2026'
   };
@@ -1446,7 +1514,7 @@ const LZ = (() => {
   }
 
   const productVisual = (p) => p.photo
-    ? `<img src="${esc(photoSrc(p.photo))}" alt="${esc(p.name)}" loading="lazy">`
+    ? `<div class="stage"><i class="blob-a"></i><i class="blob-b"></i><i class="dots"></i><i class="podium"></i><img class="ph" src="${esc(photoSrc(p.photo))}" alt="${esc((p.brand ? p.brand + ' ' : '') + p.name)}" loading="lazy"></div>`
     : bottleSVG(p.color, p.shape, p.name);
 
   return { FAMILIES, GENDERS, MOMENTS, SHAPES, getProducts, saveProducts, getSettings, saveSettings, getCart, saveCart, reset, onChange, ready, auth, access, adminLoad, uploadPhoto, status, isCloud: () => CLOUD, money, esc, uid, logoSVG, bottleSVG, productVisual };
@@ -1516,19 +1584,30 @@ const LZ = (() => {
   }
   const intensityHTML = (n) => `<div class="intensity">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}<span>&nbsp;Intensidad</span></div>`;
 
+  const hasPrice = (p) => +p.price > 0;
+  const consultLink = (p) => `https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(`¡Hola Lazeta! Quiero consultar el precio de ${p.brand ? p.brand + ' ' : ''}${p.name} (${p.ml} ml) 😊`)}`;
+  function priceHTML(p, big) {
+    if (!hasPrice(p)) return `<div class="price-row"><span class="price consult${big ? ' big' : ''}">Consultar precio</span></div>`;
+    return `<div class="price-row"><span class="price${big ? ' big' : ''}">${money(p.price)}</span>${p.oldPrice > p.price ? `<span class="price-old">${money(p.oldPrice)}</span>` : ''}${p.transferPrice > 0 ? '<span class="price-lbl">efectivo</span>' : ''}</div>
+      ${p.transferPrice > 0 && p.transferPrice < p.price ? `<div class="transfer"><b>${money(p.transferPrice)}</b> por transferencia</div>` : ''}`;
+  }
+  function buyBtn(p, cls) {
+    if (p.stock <= 0) return `<button class="${cls}" disabled>Sin stock</button>`;
+    if (!hasPrice(p)) return `<a class="${cls} consult-btn" href="${consultLink(p)}" target="_blank" rel="noopener">Consultar<span class="hide-sm"> precio</span></a>`;
+    return `<button class="${cls}" data-add="${p.id}">+ Agregar<span class="hide-sm"> al carrito</span></button>`;
+  }
   function cardHTML(p, extra = '') {
     const notes = [p.notes.top, p.notes.heart, p.notes.base].join(' · ');
     return `<article class="card" data-id="${p.id}">
       ${extra}
       <div class="card-media" data-open="${p.id}">${badgesHTML(p)}${LZ.productVisual(p)}<span class="quick">Ver detalle</span></div>
       <div class="card-body">
-        <span class="card-meta">${esc(p.family)} · ${esc(p.gender)} · ${p.ml} ml</span>
+        <span class="card-meta">${p.brand ? esc(p.brand) + ' · ' : ''}${esc(p.family)} · ${p.ml} ml</span>
         <h3>${esc(p.name)}</h3>
         <div class="notes-mini">${esc(notes)}</div>
-        <div class="price-row"><span class="price">${money(p.price)}</span>${p.oldPrice > p.price ? `<span class="price-old">${money(p.oldPrice)}</span>` : ''}</div>
-        <div class="cuotas">3 cuotas sin interés de ${money(p.price / 3)}</div>
+        ${priceHTML(p)}
         ${intensityHTML(p.intensity)}
-        <button class="btn-add" data-add="${p.id}" ${p.stock <= 0 ? 'disabled' : ''}>${p.stock <= 0 ? 'Sin stock' : '+ Agregar<span class="hide-sm"> al carrito</span>'}</button>
+        ${buyBtn(p, 'btn-add')}
       </div>
     </article>`;
   }
@@ -1558,7 +1637,7 @@ const LZ = (() => {
     let list = visible().filter((p) =>
       (filter.gender === 'Todos' || p.gender === filter.gender) &&
       (filter.family === 'Todas' || p.family === filter.family) &&
-      (!q || [p.name, p.family, p.gender, p.notes.top, p.notes.heart, p.notes.base, p.description].join(' ').toLowerCase().includes(q)));
+      (!q || [p.brand, p.name, p.family, p.gender, p.notes.top, p.notes.heart, p.notes.base, p.description].join(' ').toLowerCase().includes(q)));
     if (filter.sort === 'asc') list.sort((a, b) => a.price - b.price);
     if (filter.sort === 'desc') list.sort((a, b) => b.price - a.price);
     if (filter.sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
@@ -1598,24 +1677,27 @@ const LZ = (() => {
   /* ---------- Modal de producto ---------- */
   function openModal(id) {
     const p = byId(id); if (!p) return;
-    const stockTxt = p.stock <= 0 ? 'Sin stock por el momento' : p.stock <= 3 ? `🔥 ¡Solo quedan ${p.stock} unidades!` : '✓ En stock — despacho en 24/48 h';
+    const stockTxt = p.stock <= 0 ? 'Sin stock por el momento' : p.stock <= 3 ? `🔥 ¡Solo quedan ${p.stock} unidades!` : '✓ En stock';
+    const tags = String(p.tags || '').split(',').map((t) => t.trim()).filter(Boolean);
     $('#modalCard').innerHTML = `
       <button class="m-close" id="mClose" aria-label="Cerrar">✕</button>
       <div class="m-media">${badgesHTML(p)}${LZ.productVisual(p)}</div>
       <div class="m-body">
-        <span class="kicker">${esc(p.family)} · ${esc(p.gender)}</span>
+        <span class="kicker">${p.brand ? esc(p.brand) + ' · ' : ''}${esc(p.family)} · ${esc(p.gender)}</span>
         <h2>${esc(p.name)}</h2>
+        ${tags.length ? `<div class="feel">${tags.map((t) => `<span>✦ ${esc(t)}</span>`).join('')}</div>` : ''}
         <p>${esc(p.description)}</p>
-        <div class="m-tags"><span>${p.ml} ml</span><span>${esc(p.moment)}</span><span>Intensidad ${p.intensity}/5</span></div>
+        <div class="m-tags"><span>${p.ml} ml</span>${p.concentration ? `<span>${esc(p.concentration)}</span>` : ''}<span>${esc(p.moment)}</span><span>Intensidad ${p.intensity}/5</span></div>
         <div class="pyramid">
           <div><small>Salida</small><span>${esc(p.notes.top)}</span></div>
           <div><small>Corazón</small><span>${esc(p.notes.heart)}</span></div>
           <div><small>Fondo</small><span>${esc(p.notes.base)}</span></div>
         </div>
-        <div class="price-row"><span class="price" style="font-size:1.8rem">${money(p.price)}</span>${p.oldPrice > p.price ? `<span class="price-old">${money(p.oldPrice)}</span>` : ''}</div>
-        <div class="cuotas">3 cuotas sin interés de ${money(p.price / 3)}</div>
+        ${priceHTML(p, true)}
         <p class="m-stock ${p.stock <= 3 ? 'low' : ''}">${stockTxt}</p>
-        <button class="btn btn-primary full" data-add="${p.id}" ${p.stock <= 0 ? 'disabled style="opacity:.4"' : ''}><span>${p.stock <= 0 ? 'Sin stock' : 'Agregar al carrito'}</span></button>
+        ${!hasPrice(p) && p.stock > 0
+          ? `<a class="btn btn-primary full" href="${consultLink(p)}" target="_blank" rel="noopener"><span>Consultar precio por WhatsApp</span></a>`
+          : `<button class="btn btn-primary full" data-add="${p.id}" ${p.stock <= 0 ? 'disabled style="opacity:.4"' : ''}><span>${p.stock <= 0 ? 'Sin stock' : 'Agregar al carrito'}</span></button>`}
       </div>`;
     $('#modal').classList.add('show'); document.body.classList.add('lock');
     $('#mClose').onclick = closeModal;
@@ -1625,7 +1707,7 @@ const LZ = (() => {
 
   /* ---------- Carrito ---------- */
   function addToCart(id, btn) {
-    const p = byId(id); if (!p || p.stock <= 0) return;
+    const p = byId(id); if (!p || p.stock <= 0 || !hasPrice(p)) return;
     const item = cart.find((c) => c.id === id);
     if (item) { if (item.qty >= p.stock) return toast('No hay más stock disponible'); item.qty++; }
     else cart.push({ id, qty: 1 });
@@ -1648,7 +1730,7 @@ const LZ = (() => {
     setTimeout(() => d.remove(), 850);
   }
   function saveCart() {
-    cart = cart.filter((c) => byId(c.id));
+    cart = cart.filter((c) => byId(c.id) && hasPrice(byId(c.id)));
     cart.forEach((c) => { const p = byId(c.id); if (c.qty > p.stock) c.qty = Math.max(p.stock, 0); });
     cart = cart.filter((c) => c.qty > 0);
     LZ.saveCart(cart); renderCart();
@@ -1659,21 +1741,25 @@ const LZ = (() => {
     const subtotal = cart.reduce((s, c) => s + byId(c.id).price * c.qty, 0);
     const disc = promoApplied ? Math.round(subtotal * settings.promoPct / 100) : 0;
     const total = subtotal - disc;
-    const fs = settings.freeShipping, left = Math.max(fs - total, 0);
-    $('#shipProgress').innerHTML = count ? `${left > 0 ? `Te faltan <b style="color:var(--fg)">${money(left)}</b> para el <b style="color:var(--indigo)">envío gratis</b> 🚚` : '🎉 ¡Tenés <b style="color:var(--indigo)">envío gratis</b>!'}<div class="ship-bar"><span style="width:${Math.min(total / fs * 100, 100)}%"></span></div>` : '';
+    // Precio por transferencia (si el producto lo tiene; si no, el de efectivo)
+    const subT = cart.reduce((s, c) => { const p = byId(c.id); return s + (p.transferPrice > 0 ? p.transferPrice : p.price) * c.qty; }, 0);
+    const totalT = subT - (promoApplied ? Math.round(subT * settings.promoPct / 100) : 0);
+    const fs = +settings.freeShipping || 0, left = fs > 0 ? Math.max(fs - total, 0) : 1;
+    $('#shipProgress').innerHTML = count && fs > 0 ? `${left > 0 ? `Te faltan <b style="color:var(--fg)">${money(left)}</b> para el <b style="color:var(--indigo)">envío gratis</b> 🚚` : '🎉 ¡Tenés <b style="color:var(--indigo)">envío gratis</b>!'}<div class="ship-bar"><span style="width:${Math.min(total / fs * 100, 100)}%"></span></div>` : '';
     $('#cartItems').innerHTML = cart.length ? cart.map((c) => {
       const p = byId(c.id);
       return `<div class="ci"><div class="ci-img">${LZ.productVisual(p)}</div>
-        <div><h4>${esc(p.name)}</h4><small>${p.ml} ml · ${money(p.price)}</small><br>
+        <div><h4>${esc(p.name)}</h4><small>${p.brand ? esc(p.brand) + ' · ' : ''}${p.ml} ml · ${money(p.price)}</small><br>
         <div class="qty"><button data-q="-1" data-id="${p.id}">−</button><span>${c.qty}</span><button data-q="1" data-id="${p.id}">+</button></div></div>
         <div class="ci-right"><b>${money(p.price * c.qty)}</b><button class="ci-del" data-del="${p.id}">Quitar</button></div></div>`;
     }).join('') : '<div class="cart-empty"><div class="e-ico">🛍️</div><p>Tu carrito está vacío</p><br><a href="#catalogo" class="btn btn-ghost sm" id="goShop">Ver fragancias</a></div>';
     $('#totals').innerHTML = `<div><span>Subtotal</span><span>${money(subtotal)}</span></div>
       ${disc ? `<div style="color:#0a9b6f;font-weight:600"><span>Descuento ${esc(settings.promoCode)}</span><span>−${money(disc)}</span></div>` : ''}
-      <div><span>Envío</span><span>${left <= 0 && count ? 'Gratis' : 'A coordinar'}</span></div>
-      <div class="grand"><span>Total</span><span>${money(total)}</span></div>`;
-    const lines = cart.map((c) => { const p = byId(c.id); return `• ${c.qty} x ${p.name} (${p.ml} ml) — ${money(p.price * c.qty)}`; });
-    const msg = `¡Hola Lazeta! 👋 Quiero hacer este pedido:\n\n${lines.join('\n')}\n\n${disc ? `Código: ${settings.promoCode} (−${money(disc)})\n` : ''}*Total: ${money(total)}*`;
+      <div><span>Envío</span><span>${fs > 0 && left <= 0 && count ? 'Gratis' : 'A coordinar'}</span></div>
+      <div class="grand"><span>Total efectivo</span><span>${money(total)}</span></div>
+      ${count && totalT < total ? `<div class="grand-t"><span>💸 Por transferencia</span><span>${money(totalT)}</span></div>` : ''}`;
+    const lines = cart.map((c) => { const p = byId(c.id); return `• ${c.qty} x ${p.brand ? p.brand + ' ' : ''}${p.name} (${p.ml} ml) — ${money(p.price * c.qty)}`; });
+    const msg = `¡Hola Lazeta! 👋 Quiero hacer este pedido:\n\n${lines.join('\n')}\n\n${disc ? `Código: ${settings.promoCode} (−${money(disc)})\n` : ''}*Total efectivo: ${money(total)}*${totalT < total ? `\n*Total transferencia: ${money(totalT)}*` : ''}`;
     const co = $('#checkout');
     co.href = `https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(msg)}`;
     co.style.pointerEvents = count ? '' : 'none'; co.style.opacity = count ? '' : '.4';
@@ -1728,12 +1814,12 @@ const LZ = (() => {
 
   /* ---------- Laboratorio de aromas ---------- */
   const INGS = [
-    { n: 'Limón', e: '🍋', f: 'Cítrico', c: '#f2d43a' },
     { n: 'Bergamota', e: '🍊', f: 'Cítrico', c: '#f5a524' },
-    { n: 'Sal marina', e: '🌊', f: 'Acuático', c: '#29b6d9' },
+    { n: 'Piña', e: '🍍', f: 'Cítrico', c: '#f2d43a' },
     { n: 'Menta', e: '🌿', f: 'Acuático', c: '#3ccf8e' },
+    { n: 'Coco', e: '🥥', f: 'Gourmand', c: '#d8c3a5' },
     { n: 'Jazmín', e: '🌼', f: 'Floral', c: '#f3dc8a' },
-    { n: 'Rosa', e: '🌹', f: 'Floral', c: '#e85a8a' },
+    { n: 'Lavanda', e: '💜', f: 'Floral', c: '#9b7fd6' },
     { n: 'Vainilla', e: '🍦', f: 'Gourmand', c: '#e6c98f' },
     { n: 'Caramelo', e: '🍯', f: 'Gourmand', c: '#c9822b' },
     { n: 'Sándalo', e: '🪵', f: 'Amaderado', c: '#a0693a' },
@@ -2052,7 +2138,8 @@ const LZ = (() => {
     const units = products.reduce((s, p) => s + (+p.stock || 0), 0);
     const value = products.reduce((s, p) => s + (+p.stock || 0) * (+p.price || 0), 0);
     const low = products.filter((p) => p.stock <= 3);
-    const avg = products.length ? products.reduce((s, p) => s + +p.price, 0) / products.length : 0;
+    const priced = products.filter((p) => +p.price > 0);
+    const avg = priced.length ? priced.reduce((s, p) => s + +p.price, 0) / priced.length : 0;
     $('#kpis').innerHTML = [
       ['Productos', products.length, `${vis.length} visibles en tienda`],
       ['Unidades en stock', units, `${products.filter((p) => p.featured).length} destacados`],
@@ -2077,9 +2164,9 @@ const LZ = (() => {
     $('#plist').innerHTML = list.map((p, i) => `
       <div class="prow ${p.visible === false ? 'hidden-p' : ''}" style="animation-delay:${Math.min(i, 10) * 0.03}s">
         <div class="pthumb">${LZ.productVisual(p)}</div>
-        <div class="pname"><b>${esc(p.name)}</b><small>${esc(p.gender)} · ${p.ml} ml${p.badge ? ' · ' + esc(p.badge) : ''}</small></div>
+        <div class="pname"><b>${esc(p.name)}</b><small>${p.brand ? esc(p.brand) + ' · ' : ''}${esc(p.gender)} · ${p.ml} ml${p.badge ? ' · ' + esc(p.badge) : ''}</small></div>
         <div class="pfam"><span class="lbl">Familia</span>${esc(p.family)}</div>
-        <div class="pprice"><span class="lbl">Precio</span><b>${money(p.price)}</b>${p.oldPrice > p.price ? `<s>${money(p.oldPrice)}</s>` : ''}</div>
+        <div class="pprice"><span class="lbl">Efectivo / Transf.</span>${p.price > 0 ? `<b>${money(p.price)}</b>${p.transferPrice > 0 ? `<small class="ptr">${money(p.transferPrice)} transf.</small>` : ''}` : '<b class="pconsult">Consultar</b>'}</div>
         <div class="pstock"><span class="lbl">Stock</span><div class="stock-edit ${p.stock <= 3 ? 'low' : ''}"><button data-st="-1" data-id="${p.id}">−</button><span>${p.stock}</span><button data-st="1" data-id="${p.id}">+</button></div></div>
         <div class="pact">
           <button class="ibtn ${p.featured ? 'on' : ''}" title="Destacado" data-feat="${p.id}">★</button>
@@ -2112,8 +2199,9 @@ const LZ = (() => {
 
   function formData() {
     return {
-      name: F.name.value.trim() || 'Nombre del perfume', gender: F.gender.value, family: F.family.value,
-      price: +F.price.value || 0, oldPrice: +F.oldPrice.value || 0, stock: +F.stock.value || 0, ml: +F.ml.value || 100,
+      name: F.name.value.trim() || 'Nombre del perfume', brand: F.brand.value.trim(), concentration: F.concentration.value,
+      gender: F.gender.value, family: F.family.value, tags: F.tags.value.trim(),
+      price: +F.price.value || 0, transferPrice: +F.transferPrice.value || 0, oldPrice: +F.oldPrice.value || 0, stock: +F.stock.value || 0, ml: +F.ml.value || 100,
       moment: F.moment.value, intensity: +F.intensity.value, badge: F.badge.value.trim(),
       notes: { top: F.top.value.trim(), heart: F.heart.value.trim(), base: F.base.value.trim() },
       description: F.description.value.trim(), color: F.color.value, shape: F.shape.value,
@@ -2126,16 +2214,20 @@ const LZ = (() => {
     $('#dropPrev').innerHTML = LZ.productVisual(p);
     const notes = [p.notes.top, p.notes.heart, p.notes.base].filter(Boolean).join(' · ');
     $('#cardPrev').innerHTML = `<article class="card"><div class="card-media"><div class="badges">${p.oldPrice > p.price ? `<span class="badge off">-${Math.round((1 - p.price / p.oldPrice) * 100)}%</span>` : ''}${p.badge ? `<span class="badge">${esc(p.badge)}</span>` : ''}</div>${LZ.productVisual(p)}</div>
-      <div class="card-body"><span class="card-meta">${esc(p.family)} · ${esc(p.gender)} · ${p.ml} ml</span><h3>${esc(p.name)}</h3><div class="notes-mini">${esc(notes)}</div>
-      <div class="price-row"><span class="price">${money(p.price)}</span>${p.oldPrice > p.price ? `<span class="price-old">${money(p.oldPrice)}</span>` : ''}</div></div></article>`;
+      <div class="card-body"><span class="card-meta">${p.brand ? esc(p.brand) + ' · ' : ''}${esc(p.family)} · ${p.ml} ml</span><h3>${esc(p.name)}</h3><div class="notes-mini">${esc(notes)}</div>
+      ${p.price > 0 ? `<div class="price-row"><span class="price">${money(p.price)}</span>${p.oldPrice > p.price ? `<span class="price-old">${money(p.oldPrice)}</span>` : ''}</div>${p.transferPrice > 0 && p.transferPrice < p.price ? `<div class="transfer"><b>${money(p.transferPrice)}</b> por transferencia</div>` : ''}` : '<div class="price-row"><span class="price consult">Consultar precio</span></div>'}</div></article>`;
   }
   F.addEventListener('input', preview);
 
   function openForm(id) {
     editing = id || null;
-    const p = id ? products.find((x) => x.id === id) : { name: '', gender: 'Unisex', family: 'Cítrico', price: '', oldPrice: '', stock: 10, ml: 100, moment: 'Día', intensity: 3, badge: 'Nuevo', notes: { top: '', heart: '', base: '' }, description: '', color: '#0EC0E0', shape: 'round', visible: true, featured: false, photo: '' };
+    const p = id ? products.find((x) => x.id === id) : { name: '', brand: '', concentration: 'Eau de Parfum', tags: '', gender: 'Unisex', family: 'Cítrico', price: '', transferPrice: '', oldPrice: '', stock: 10, ml: 100, moment: 'Día', intensity: 3, badge: 'Nuevo', notes: { top: '', heart: '', base: '' }, description: '', color: '#0EC0E0', shape: 'round', visible: true, featured: false, photo: '' };
     $('#pmTitle').textContent = id ? 'Editar producto' : 'Nuevo producto';
-    ['name', 'gender', 'family', 'price', 'oldPrice', 'stock', 'ml', 'moment', 'intensity', 'badge', 'description', 'color', 'shape'].forEach((k) => (F[k].value = p[k] || (k === 'oldPrice' ? '' : p[k] ?? '')));
+    ['name', 'brand', 'concentration', 'tags', 'gender', 'family', 'price', 'transferPrice', 'oldPrice', 'stock', 'ml', 'moment', 'intensity', 'badge', 'description', 'color', 'shape'].forEach((k) => {
+      const v = p[k];
+      F[k].value = ['price', 'transferPrice', 'oldPrice'].includes(k) ? (+v > 0 ? v : '') : (v ?? '');
+    });
+    if (!F.concentration.value) F.concentration.value = 'Eau de Parfum';
     F.top.value = p.notes.top; F.heart.value = p.notes.heart; F.base.value = p.notes.base;
     F.visible.checked = p.visible !== false; F.featured.checked = !!p.featured;
     photoData = p.photo || ''; uploadSeq++; uploading = false; $('#photo').value = '';
